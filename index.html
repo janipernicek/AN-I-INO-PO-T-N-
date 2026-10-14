@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aničino počítání 🐶</title>
+<style>
+body{margin:0;padding:20px;text-align:center;font-family:Arial,sans-serif;background:#fff2f7;color:#493951}
+h1{color:#a16bd4}
+.card{max-width:500px;margin:auto;background:white;padding:20px;border-radius:25px;box-shadow:0 5px 20px #ddc8e5}
+h2{font-size:48px;margin:25px 0}
+.dogs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+button{border:0;border-radius:16px;padding:15px;background:#f4eaff;font-size:23px;cursor:pointer}
+.dog{font-size:38px}
+.dog b{display:block;font-size:25px}
+#msg{min-height:28px;font-weight:bold;color:#7d54ae;margin:20px 0}
+.small{font-size:15px;color:#777}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>🐶 Aničino počítání 🐾</h1>
+<p id="round">Kolo 1 • Příklad 1 z 10</p>
+<h2 id="q">15 − 7 = ?</h2>
+<div class="dogs" id="dogs"></div>
+<div id="msg"></div>
+<p id="stats" class="small"></p>
+<button onclick="start()">🔄 Začít znovu</button>
+</div>
+<script>
+let n=0,round=1,errors=0,tries=0,first=0,wrong=0,answer=0,locked=false;
+
+function shuffle(a){return a.sort(()=>Math.random()-.5)}
+
+function start(){
+ n=0;errors=0;tries=0;first=0;wrong=0;
+ document.getElementById('stats').textContent='';
+ next();
+}
+
+function next(){
+ if(n===10){result();return}
+ locked=false;
+ let add=Math.random()<.5;
+ let a,b;
+ if(add){a=Math.floor(Math.random()*21);b=Math.floor(Math.random()*(21-a));answer=a+b}
+ else{a=Math.floor(Math.random()*21);b=Math.floor(Math.random()*(a+1));answer=a-b}
+ document.getElementById('q').textContent=`${a} ${add?'+':'−'} ${b} = ?`;
+ document.getElementById('round').textContent=`Kolo ${round} • Příklad ${n+1} z 10`;
+ document.getElementById('msg').textContent='';
+ let nums=new Set([answer]);
+ while(nums.size<5)nums.add(Math.floor(Math.random()*21));
+ let choices=shuffle([...nums]);
+ document.getElementById('dogs').innerHTML=choices.map((x,i)=>
+ `<button class="dog" onclick="pick(${x},this)"> ${['🐶','🐕','🐩','🐶','🐕'][i]}<b>${x}</b></button>`
+ ).join('');
+}
+
+function pick(x,btn){
+ if(locked||btn.disabled)return;
+ tries++;
+ if(x===answer){
+  locked=true;
+  if(wrong===0)first++;
+  document.getElementById('msg').textContent=wrong?'Hurá, zvládla jsi to! 🐾':'Výborně! 🌟';
+  btn.style.background='#c9f5dd';
+  document.querySelectorAll('.dog').forEach(b=>b.disabled=true);
+  n++;wrong=0;
+  setTimeout(next,700);
+ }else{
+  errors++;wrong++;btn.disabled=true;
+  btn.style.background='#ffdce5';
+  document.getElementById('msg').textContent='Nevadí, zkus jiného pejska! 💕';
+ }
+}
+
+function result(){
+ locked=true;
+ document.getElementById('q').textContent='🏆 Hurá, hotovo!';
+ document.getElementById('dogs').innerHTML='';
+ document.getElementById('round').textContent=`Dokončila jsi kolo ${round}!`;
+ document.getElementById('msg').textContent=
+ `Správně napoprvé: ${first}/10 🌟`;
+ document.getElementById('stats').innerHTML=
+ `Chybné pokusy: ${errors}<br>Všechny pokusy: ${tries}<br>Úspěšnost napoprvé: ${first*10}%<br><br>Jsi šikulka! 💖<br><br><button onclick="round++;start()">Dalších 10 příkladů 🐾</button>`;
+}
+next();
+</script>
+</body>
+</html>
